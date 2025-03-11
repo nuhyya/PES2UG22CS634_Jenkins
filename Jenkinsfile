@@ -24,6 +24,7 @@ pipeline {
                 sh 'sudo mv PES2UG22CS634-1 /usr/local/bin/'
             }
         }
+    }
 
     post {
         failure {
