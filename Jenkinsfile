@@ -1,38 +1,55 @@
 pipeline {
     agent any
-    
-    tools {
-        maven 'Maven' // Use the name you configured in Global Tool Configuration
+
+    environment {
+        APP_NAME = "mycppapp"
+        DEPLOY_SERVER = "user@server:/path/to/deploy"
     }
-    
+
     stages {
         stage('Build') {
             steps {
-                sh 'mvn clean install'
-                echo 'Build Stage Successful'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-                echo 'Test Stage Successful'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
+                script {
+                    echo 'Starting Build Stage...'
+                    sh 'make'
+                    echo 'Build Stage Successful'
                 }
             }
         }
+
+        stage('Test') {
+            steps {
+                script {
+                    echo 'Starting Test Stage...'
+                    sh './run_tests.sh'
+                    echo 'Test Stage Successful'
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
-                sh 'mvn deploy'
-                echo 'Deployment Successful'
+                script {
+                    echo 'Starting Deployment...'
+                    sh 'scp mycppapp $DEPLOY_SERVER'
+                    echo 'Deployment Successful'
+                }
             }
         }
     }
+
     post {
+        success {
+            echo 'Pipeline executed successfully! 🎉'
+        }
+
         failure {
-            echo 'Pipeline failed'
+            echo 'Pipeline failed ❌'
+            slackSend channel: '#devops', message: "Jenkins Pipeline Failed!", color: 'danger'
+        }
+
+        always {
+            echo 'Cleaning up workspace...'
         }
     }
 }
