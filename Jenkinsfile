@@ -21,10 +21,10 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-                sh 'mv PES2UG22CS634-1 /usr/local/bin/'
+                sh 'sudo mv PES2UG22CS634-1 /usr/local/bin/'
             }
         }
-    }
+
     post {
         failure {
             echo 'Pipeline failed'
