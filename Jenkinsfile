@@ -1,42 +1,31 @@
 pipeline {
     agent any
-
     stages {
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/nuhyya/PES2UG22CS634_Jenkins.git'
-            }
-        }
-
         stage('Build') {
             steps {
-                sh 'g++ -o PES2UG22CS634-1 hi.cpp'
+                sh 'mvn clean install'
                 echo 'Build Stage Successful'
             }
         }
-
         stage('Test') {
             steps {
-                sh './PES2UG22CS634-1'
+                sh 'mvn test'
                 echo 'Test Stage Successful'
             }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
         }
-
         stage('Deploy') {
             steps {
-                echo 'Deploying application...'
-                sh '''
-                chmod +x PES2UG22CS634-1
-                mv PES2UG22CS634-1 $HOME/bin/ || echo "Move failed, check permissions!"
-                '''
+                sh 'mvn deploy'
+                echo 'Deployment Successful'
             }
         }
     }
-
     post {
-        success {
-            echo 'Pipeline completed successfully!'
-        }
         failure {
             echo 'Pipeline failed'
         }
