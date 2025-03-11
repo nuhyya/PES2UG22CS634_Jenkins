@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     environment {
-        APP_NAME = "mycppapp"
+        APP_NAME = "myapp"
+        DOCKER_IMAGE = "myapp:latest"
         DEPLOY_SERVER = "user@server:/path/to/deploy"
     }
 
@@ -11,7 +12,7 @@ pipeline {
             steps {
                 script {
                     echo 'Starting Build Stage...'
-                    sh 'make'
+                    sh 'npm install'
                     echo 'Build Stage Successful'
                 }
             }
@@ -21,7 +22,7 @@ pipeline {
             steps {
                 script {
                     echo 'Starting Test Stage...'
-                    sh './run_tests.sh'
+                    sh 'npm test'
                     echo 'Test Stage Successful'
                 }
             }
@@ -31,7 +32,8 @@ pipeline {
             steps {
                 script {
                     echo 'Starting Deployment...'
-                    sh 'scp mycppapp $DEPLOY_SERVER'
+                    sh 'docker build -t $DOCKER_IMAGE .'
+                    sh 'docker run -d -p 80:80 $DOCKER_IMAGE'
                     echo 'Deployment Successful'
                 }
             }
@@ -50,6 +52,7 @@ pipeline {
 
         always {
             echo 'Cleaning up workspace...'
+            sh 'docker system prune -f'
         }
     }
 }
